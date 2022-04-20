@@ -1,1 +1,3 @@
-# CSCI1430_Final_Project
+# Hand Gestures Translator
+## CSCI1430 Final Project
+-  **Team Member:** Ruigang Yao, Wangsen Tian
