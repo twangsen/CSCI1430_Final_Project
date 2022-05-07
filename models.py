@@ -9,6 +9,7 @@ from tensorflow.keras.layers import \
     Conv2D, MaxPool2D, Dropout, Flatten, Dense
 
 import hyperparameters as hp
+import numpy as np
 
 
 class YourModel(tf.keras.Model):
@@ -75,7 +76,7 @@ class YourModel(tf.keras.Model):
               tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
               tf.keras.layers.MaxPool2D(pool_size=(2,2)),
               tf.keras.layers.Flatten(),
-              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dropout(0.3),
               tf.keras.layers.Dense(units=256, activation='relu'),
               tf.keras.layers.Dense(units=64, activation='relu'),
               tf.keras.layers.Dense(units=hp.num_classes, activation='softmax')
@@ -87,9 +88,13 @@ class YourModel(tf.keras.Model):
 
         for layer in self.architecture:
             x = layer(x)
-
-        return x
-
+        return x 
+        
+     
+    def predict(self, x):
+           x = self.call(x)
+           return x
+           
     @staticmethod
     def loss_fn(labels, predictions):
         """ Loss function for the model. """

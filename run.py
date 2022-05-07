@@ -23,6 +23,7 @@ from lime import lime_image
 from skimage.segmentation import mark_boundaries
 from matplotlib import pyplot as plt
 import numpy as np
+import predictor
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
@@ -190,10 +191,10 @@ def main():
         ARGS.load_vgg = os.path.abspath(ARGS.load_vgg)
 
     # Run script from location of run.py
-    # os.chdir(sys.path[0])
-    os.chdir("D:\\BrownCourse\\1430\\Project\\homework5_cnns-final\\code")
+    #os.chdir(sys.path[0])
+    # os.chdir("D:\\BrownCourse\\1430\\Project\\homework5_cnns-final\\code")
 
-    datasets = Datasets(ARGS.data, ARGS.task)
+    #datasets = Datasets(ARGS.data, ARGS.task)
 
     if ARGS.task == '1':
         model = YourModel()
@@ -238,13 +239,13 @@ def main():
         metrics=["sparse_categorical_accuracy"])
 
     if ARGS.evaluate:
-        test(model, datasets.test_data)
-
+        # test(model, datasets.test_data)
         # TODO: change the image path to be the image of your choice by changing
         # the lime-image flag when calling run.py to investigate
         # i.e. python run.py --evaluate --lime-image test/Bedroom/image_003.jpg
-        path = ARGS.data + os.sep + ARGS.lime_image
-        LIME_explainer(model, path, datasets.preprocess_fn)
+        # path = ARGS.data + os.sep + ARGS.lime_image
+        # LIME_explainer(model, path, datasets.preprocess_fn)
+        predictor.live_predict(model)
     else:
         train(model, datasets, checkpoint_path, logs_path, init_epoch)
 
