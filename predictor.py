@@ -8,6 +8,7 @@ import cv2
 from sklearn.utils import shuffle
 from PIL import Image
 import imutils
+import os
 
 # global variables
 bg = None
@@ -62,7 +63,7 @@ def main():
     camera = cv2.VideoCapture(0)
 
     # region of interest (ROI) coordinates
-    top, right, bottom, left = 100, 100, 300, 300
+    top, right, bottom, left = 100, 300, 300, 500
 
     # initialize num of frames
     num_frames = 0
@@ -135,6 +136,7 @@ def main():
 
         # if the user pressed "q", then stop looping
         if keypress == ord("q"):
+            os.remove("Temp.jpg")
             break
         
         if keypress == ord("s"):
@@ -153,37 +155,6 @@ def getPredictedClass():
     img = np.expand_dims(img,axis=0)
     prediction = model.predict(img)
     return np.argmax(prediction), np.amax(prediction) 
-
-def showStatistics(predictedClass, confidence):
-
-    textImage = np.zeros((300,512,3), np.uint8)
-    className = ""
-
-    className = str(predictedClass)
-    # if predictedClass == 0:
-    #     className = "0"
-    # elif predictedClass == 1:
-    #     className = "1"
-    # elif predictedClass == 2:
-    #     className = "2"
-
-    cv2.putText(textImage,"Pedicted Class : " + className, 
-    (30, 30), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-
-    cv2.putText(textImage,"Probability : " + str(confidence * 100) + '%', 
-    (30, 100), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-    cv2.imshow("Statistics", textImage)
-
-
-
 
 # Model defined
 model = Sequential([
