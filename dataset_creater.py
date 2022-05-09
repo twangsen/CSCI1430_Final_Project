@@ -5,10 +5,10 @@ import numpy as np
 
 # global variables
 bg = None
-cat_str = "temp"
-image_num = 0
-base = 0 
-train_test = "train"
+cat_str = "temp" # catagory string name
+image_num = 0 # 0 to 900
+base = 0 # last reached saved image num do not edit
+train_test = "train" # train or test
 
 def run_avg(image, aWeight):
     global bg

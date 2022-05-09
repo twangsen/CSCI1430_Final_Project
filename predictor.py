@@ -107,20 +107,22 @@ def main():
                 (thresholded, segmented) = hand
 
                 # draw the segmented region and display the frame
-                cv2.drawContours(clone, [segmented + (right, top)], -1, (0, 0, 255))
+                cv2.drawContours(clone, [segmented + (right, top)], -1, (255, 255, 255))
                 if start_recording:
                     cv2.imwrite('Temp.jpg', thresholded)
 
                     #resizeImage('Temp.png')
 
                     predictedClass, confidence = getPredictedClass()
-                    showStatistics(predictedClass, confidence)
+                    #showStatistics(predictedClass, confidence)
+                    cv2.putText(clone,"Dected Gesture : " + str(predictedClass), (100, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                    cv2.putText(clone,"Probability : " + str(confidence * 100) + "%", (100, 340), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
 
                 cv2.imshow("Thesholded", thresholded)
 
         # draw the segmented hand
-        cv2.rectangle(clone, (left, top), (right, bottom), (0,255,0), 2)
+        cv2.rectangle(clone, (left, top), (right, bottom), (255,255,255), 2)
 
         # increment the number of frames
         num_frames += 1
