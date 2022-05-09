@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Evaluate",
+            "type": "python",
+            "request": "launch",
+            "cwd": "/Users/wangsentian/Desktop/1430Final/CSCI1430_Final_Project/",
+            "program": "run.py",
+            "args": ["--task", "1" , "--load-checkpoint","//Users/wangsentian/Desktop/1430Final/CSCI1430_Final_Project/checkpoints/your_model/050722-182341/your.weights.e008-acc0.8050.h5","--evaluate"],
+            "console": "integratedTerminal"
+            
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+    ]
+}

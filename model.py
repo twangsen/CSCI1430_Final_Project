@@ -81,7 +81,7 @@ data_gen = tf.keras.preprocessing.image.ImageDataGenerator(
                 horizontal_flip=True)
 it = data_gen.flow(loadedImages, outputVectors, batch_size=30, shuffle = True)
 
-model.fit(it, batch_size=30, epochs=5,
+model.fit(it, batch_size=30, epochs=30,
            validation_data=(testImages, testLabels))
 
 model.save_weights("my_checkpoint")

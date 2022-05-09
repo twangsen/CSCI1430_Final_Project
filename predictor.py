@@ -172,7 +172,7 @@ def showStatistics(predictedClass, confidence):
     (255, 255, 255),
     2)
 
-    cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
+    cv2.putText(textImage,"Probability : " + str(confidence * 100) + '%', 
     (30, 100), 
     cv2.FONT_HERSHEY_SIMPLEX, 
     1,
@@ -192,10 +192,12 @@ model = Sequential([
               tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
               tf.keras.layers.MaxPool2D(pool_size=(2,2)),
               tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
               tf.keras.layers.MaxPool2D(pool_size=(2,2)),
               tf.keras.layers.Flatten(),
-              tf.keras.layers.Dropout(0.5),
+              tf.keras.layers.Dropout(0.3),
               tf.keras.layers.Dense(units=256, activation='relu'),
+              tf.keras.layers.Dropout(0.2),
               tf.keras.layers.Dense(units=64, activation='relu'),
               tf.keras.layers.Dense(units=10, activation='softmax')])
 
