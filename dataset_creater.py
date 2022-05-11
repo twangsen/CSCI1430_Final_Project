@@ -27,13 +27,13 @@ def segment(image, threshold=28):
     diff = cv2.absdiff(bg.astype("uint8"), image)
 
     # threshold the diff image so that we get the foreground
-    thresholded = cv2.threshold(diff,
+    silhouette = cv2.threshold(diff,
                                 threshold,
                                 255,
                                 cv2.THRESH_BINARY)[1]
 
     # get the contours in the thresholded image
-    (cnts, _) = cv2.findContours(thresholded.copy(),
+    (cnts, _) = cv2.findContours(silhouette.copy(),
                                  cv2.RETR_EXTERNAL,
                                  cv2.CHAIN_APPROX_SIMPLE)
 
@@ -42,8 +42,8 @@ def segment(image, threshold=28):
         return
     else:
         # based on contour area, get the maximum contour which is the hand
-        segmented = max(cnts, key=cv2.contourArea)
-        return (thresholded, segmented)
+        contour  = max(cnts, key=cv2.contourArea)
+        return (silhouette, contour)
 
 
 def main():
@@ -52,24 +52,20 @@ def main():
     global base 
     global train_test
 
-    # initialize weight for running average
     aWeight = 0.5
 
-    # get the reference to the webcam
     camera = cv2.VideoCapture(0)
 
-    # region of interest (ROI) coordinates
-    #top, right, bottom, left = 10, 350, 225, 590
+    # region of hand detecting area
     top, right, bottom, left = 100, 100, 300, 300
 
-    # initialize num of frames
+
     num_frames = 0
     last_reset = num_frames
-    #image_num = 0
+
 
     start_recording = False
 
-    # keep looping, until interrupted
     while(True):
         # get the current frame
         (grabbed, frame) = camera.read()
@@ -81,8 +77,8 @@ def main():
             # flip the frame so that it is not the mirror view
             frame = cv2.flip(frame, 1)
 
-            # clone the frame
-            clone = frame.copy()
+            
+            one_frame = frame.copy()
 
             # get the height and width of the frame
             (height, width) = frame.shape[:2]
@@ -94,12 +90,13 @@ def main():
             gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
             gray = cv2.GaussianBlur(gray, (7, 7), 0)
 
-            # to get the background, keep looking till a threshold is reached
-            # so that our running average model gets calibrated
             keypress = cv2.waitKey(1) & 0xFF
+
+            # to reset press r
             if keypress == ord("r"):
                 last_reset = num_frames
                 print("reset start")
+
             if num_frames - last_reset < 30:
                 run_avg(gray, aWeight)
                 print(num_frames - last_reset)
@@ -109,39 +106,33 @@ def main():
                 # segment the hand region
                 hand = segment(gray)
 
-                # check whether hand region is segmented
                 if hand is not None:
-                    # if yes, unpack the thresholded image and
-                    # segmented region
-                    (thresholded, segmented) = hand
 
-                    # draw the segmented region and display the frame
+                    (silhouette, contour) = hand
+
+                    # draw contours 
                     cv2.drawContours(
-                        clone, [segmented + (right, top)], -1, (0, 0, 255))
+                        one_frame, [contour + (right, top)], -1, (0, 0, 255))
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
                         print("reached" + str(image_num + base))
                         cv2.imwrite("/Users/wangsentian/Downloads/Hand/Dataset/" + train_test + "/"+ cat_str + "/" + cat_str + "_" + 
-                                    str(image_num+base) + '.jpg', thresholded)
+                                    str(image_num+base) + '.jpg', silhouette)
                         image_num += 1
-                    cv2.imshow("Thesholded", thresholded)
+                    cv2.imshow("silhouette", silhouette)
 
-            # draw the segmented hand
-            cv2.rectangle(clone, (left, top), (right, bottom), (0, 255, 0), 2)
+            # draw the hand
+            cv2.rectangle(one_frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
             # increment the number of frames
             num_frames += 1
+            cv2.imshow("Data Base Creator", one_frame)
 
-            # display the frame with segmented hand
-            cv2.imshow("Video Feed", clone)
 
-            # observe the keypress by the user
-            #keypress = cv2.waitKey(1) & 0xFF
-
-            # if the user pressed "q", then stop looping
+            
             if  image_num > 100:
-                #break
+                # 100 per keyboard press 
                 start_recording = False
                 image_num = 0
                 base += 100
