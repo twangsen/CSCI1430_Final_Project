@@ -1,3 +1,6 @@
+
+
+
 import tensorflow as tf
 import tensorflow as tf
 from tensorflow.keras.layers import \
@@ -37,13 +40,13 @@ def segment(image, threshold=25):
     diff = cv2.absdiff(bg.astype("uint8"), image)
 
     # threshold the diff image so that we get the foreground
-    thresholded = cv2.threshold(diff,
+    silhouette = cv2.threshold(diff,
                                 threshold,
                                 255,
                                 cv2.THRESH_BINARY)[1]
 
     # get the contours in the thresholded image
-    (cnts, _) = cv2.findContours(thresholded.copy(),
+    (cnts, _) = cv2.findContours(silhouette.copy(),
                                     cv2.RETR_EXTERNAL,
                                     cv2.CHAIN_APPROX_SIMPLE)
 
@@ -53,7 +56,7 @@ def segment(image, threshold=25):
     else:
         # based on contour area, get the maximum contour which is the hand
         segmented = max(cnts, key=cv2.contourArea)
-        return (thresholded, segmented)
+        return (silhouette, segmented)
 
 def main():
     # initialize weight for running average
@@ -104,23 +107,20 @@ def main():
             # check whether hand region is segmented
             if hand is not None:
                 # if yes, unpack the thresholded image and
-                # segmented region
-                (thresholded, segmented) = hand
+                (silhouette, segmented) = hand
 
                 # draw the segmented region and display the frame
                 cv2.drawContours(clone, [segmented + (right, top)], -1, (255, 255, 255))
                 if start_recording:
-                    cv2.imwrite('Temp.jpg', thresholded)
+                    cv2.imwrite('Temp.jpg', silhouette)
 
-                    #resizeImage('Temp.png')
-
-                    predictedClass, confidence = getPredictedClass()
+                    predictedClass, confidence = getPrediction()
                     #showStatistics(predictedClass, confidence)
-                    cv2.putText(clone,"Dected Gesture : " + str(predictedClass), (100, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                    cv2.putText(clone,"Detected Gesture : " + str(predictedClass), (100, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
                     cv2.putText(clone,"Probability : " + str(confidence * 100) + "%", (100, 340), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
 
-                cv2.imshow("Thesholded", thresholded)
+                cv2.imshow("S", silhouette)
 
         # draw the segmented hand
         cv2.rectangle(clone, (left, top), (right, bottom), (255,255,255), 2)
@@ -142,10 +142,8 @@ def main():
         if keypress == ord("s"):
             start_recording = True
 
-def getPredictedClass():
-    # Predict
-    #image = cv2.imread('Temp.jpg')
-    #gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+def getPrediction():
+
     img = Image.open('Temp.jpg')
     img = img.resize((50, 50))
     img = np.array(img, dtype=np.float32)

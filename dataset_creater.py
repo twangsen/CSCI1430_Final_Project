@@ -1,3 +1,5 @@
+# the code had referenced the idea from the blog
+
 # organize imports
 import cv2
 import imutils
@@ -112,7 +114,7 @@ def main():
 
                     # draw contours 
                     cv2.drawContours(
-                        one_frame, [contour + (right, top)], -1, (0, 0, 255))
+                        one_frame, [contour + (right, top)], -1, (0, 255, 0))
                     if start_recording:
 
                         # Mention the directory in which you wanna store the images followed by the image name
@@ -123,7 +125,7 @@ def main():
                     cv2.imshow("silhouette", silhouette)
 
             # draw the hand
-            cv2.rectangle(one_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+            cv2.rectangle(one_frame, (left, top), (right, bottom), (255, 255, 255), 2)
 
             # increment the number of frames
             num_frames += 1
