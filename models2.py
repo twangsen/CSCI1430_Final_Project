@@ -60,7 +60,7 @@ model = Sequential([
               tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
               tf.keras.layers.MaxPool2D(pool_size=(2,2)),
               tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
-              tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              #tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
               tf.keras.layers.MaxPool2D(pool_size=(2,2)),
               tf.keras.layers.Flatten(),
               tf.keras.layers.Dropout(0.3),

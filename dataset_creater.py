@@ -1,4 +1,9 @@
-# the code had referenced the idea from the blog
+# 1430  CV group project
+# this file have reference the idea from an online article written by Ilango
+# Gogul Ilango. Hand gesture recognition using python and opencv - part 1, Apr 2017.
+# https://gogul.dev/software/hand-gesture-recognition-p1
+
+
 
 # organize imports
 import cv2

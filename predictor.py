@@ -1,4 +1,7 @@
-
+# 1430  CV group project
+# this file have reference the idea from an online article written by Ilango
+# Gogul Ilango. Hand gesture recognition using python and opencv - part 1, Apr 2017.
+# https://gogul.dev/software/hand-gesture-recognition-p1
 
 
 import tensorflow as tf
@@ -86,9 +89,6 @@ def main():
         # clone the frame
         clone = frame.copy()
 
-        # get the height and width of the frame
-        (height, width) = frame.shape[:2]
-
         # get the ROI
         roi = frame[top:bottom, right:left]
 
@@ -112,9 +112,18 @@ def main():
                 # draw the segmented region and display the frame
                 cv2.drawContours(clone, [segmented + (right, top)], -1, (255, 255, 255))
                 if start_recording:
-                    cv2.imwrite('Temp.jpg', silhouette)
+                    cv2.imwrite('temp.jpg', silhouette)
+                    # silly transfer to be update
+                    img = Image.open('temp.jpg')
+                    img = img.resize((50, 50))
+                    img = np.array(img, dtype=np.float32)
+                    img /= 255.
+                    print(img.shape)
+                    img = np.expand_dims(img,axis=2)
+                    img = np.expand_dims(img,axis=0)
+                    prediction = model.predict(img)
+                    predictedClass, confidence = np.argmax(prediction), np.amax(prediction) 
 
-                    predictedClass, confidence = getPrediction()
                     #showStatistics(predictedClass, confidence)
                     cv2.putText(clone,"Detected Gesture : " + str(predictedClass), (100, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
                     cv2.putText(clone,"Probability : " + str(confidence * 100) + "%", (100, 340), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
@@ -141,18 +150,6 @@ def main():
         
         if keypress == ord("s"):
             start_recording = True
-
-def getPrediction():
-
-    img = Image.open('Temp.jpg')
-    img = img.resize((50, 50))
-    img = np.array(img, dtype=np.float32)
-    img /= 255.
-    print(img.shape)
-    img = np.expand_dims(img,axis=2)
-    img = np.expand_dims(img,axis=0)
-    prediction = model.predict(img)
-    return np.argmax(prediction), np.amax(prediction) 
 
 # Model defined
 model = Sequential([
