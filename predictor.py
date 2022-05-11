@@ -1,11 +1,14 @@
 import tensorflow as tf
+import tensorflow as tf
+from tensorflow.keras.layers import \
+    Conv2D, MaxPool2D, Dropout, Flatten, Dense
+from tensorflow.keras.models import Sequential
 import numpy as np
-from PIL import Image
 import cv2
+from sklearn.utils import shuffle
+from PIL import Image
 import imutils
-from preprocess import Datasets
-import hyperparameters as hp
-
+import os
 
 # global variables
 bg = None
@@ -52,7 +55,7 @@ def segment(image, threshold=25):
         segmented = max(cnts, key=cv2.contourArea)
         return (thresholded, segmented)
 
-def main(model):
+def main():
     # initialize weight for running average
     aWeight = 0.5
 
@@ -60,7 +63,7 @@ def main(model):
     camera = cv2.VideoCapture(0)
 
     # region of interest (ROI) coordinates
-    top, right, bottom, left = 10, 350, 225, 590
+    top, right, bottom, left = 100, 300, 300, 500
 
     # initialize num of frames
     num_frames = 0
@@ -97,27 +100,30 @@ def main(model):
         else:
             # segment the hand region
             hand = segment(gray)
-            
 
             # check whether hand region is segmented
             if hand is not None:
-           
                 # if yes, unpack the thresholded image and
                 # segmented region
                 (thresholded, segmented) = hand
 
                 # draw the segmented region and display the frame
-                cv2.drawContours(clone, [segmented + (right, top)], -1, (0, 0, 255))
+                cv2.drawContours(clone, [segmented + (right, top)], -1, (255, 255, 255))
                 if start_recording:
-                    cv2.imwrite('Temp.png', thresholded)
-                    # resizeImage('Temp.png')
-                    
-                    predictedClass, confidence = getPredictedClass(model)
-                    showStatistics(predictedClass, confidence)
+                    cv2.imwrite('Temp.jpg', thresholded)
+
+                    #resizeImage('Temp.png')
+
+                    predictedClass, confidence = getPredictedClass()
+                    #showStatistics(predictedClass, confidence)
+                    cv2.putText(clone,"Dected Gesture : " + str(predictedClass), (100, 320), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+                    cv2.putText(clone,"Probability : " + str(confidence * 100) + "%", (100, 340), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+
                 cv2.imshow("Thesholded", thresholded)
 
         # draw the segmented hand
-        cv2.rectangle(clone, (left, top), (right, bottom), (0,255,0), 2)
+        cv2.rectangle(clone, (left, top), (right, bottom), (255,255,255), 2)
 
         # increment the number of frames
         num_frames += 1
@@ -130,62 +136,47 @@ def main(model):
 
         # if the user pressed "q", then stop looping
         if keypress == ord("q"):
+            os.remove("Temp.jpg")
             break
         
         if keypress == ord("s"):
             start_recording = True
 
-def getPredictedClass(model):
+def getPredictedClass():
     # Predict
-    image = cv2.imread('Temp.png')
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-
-    img = np.resize(image, (hp.img_size, hp.img_size))
+    #image = cv2.imread('Temp.jpg')
+    #gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    img = Image.open('Temp.jpg')
+    img = img.resize((50, 50))
     img = np.array(img, dtype=np.float32)
-    img /= 255
-
-    # Grayscale -> RGB
-    if len(img.shape) == 2:
-        img = np.stack([img, img, img], axis=-1)
-    
-    img = np.expand_dims(img, 0)
-
+    img /= 255.
+    print(img.shape)
+    img = np.expand_dims(img,axis=2)
+    img = np.expand_dims(img,axis=0)
     prediction = model.predict(img)
-    print(prediction)
-    return np.argmax(prediction), np.amax(prediction)
+    return np.argmax(prediction), np.amax(prediction) 
 
-def showStatistics(predictedClass, confidence):
+# Model defined
+model = Sequential([
+              tf.keras.layers.Conv2D(filters=32, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.MaxPool2D(pool_size=(2,2)),
+              tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.MaxPool2D(pool_size=(2,2)),
+              tf.keras.layers.Conv2D(filters=128, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.MaxPool2D(pool_size=(2,2)),
+              tf.keras.layers.Conv2D(filters=256, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.Conv2D(filters=64, kernel_size=(3, 3), padding='same', strides=(1, 1), activation='relu'),
+              tf.keras.layers.MaxPool2D(pool_size=(2,2)),
+              tf.keras.layers.Flatten(),
+              tf.keras.layers.Dropout(0.3),
+              tf.keras.layers.Dense(units=256, activation='relu'),
+              tf.keras.layers.Dropout(0.2),
+              tf.keras.layers.Dense(units=64, activation='relu'),
+              tf.keras.layers.Dense(units=10, activation='softmax')])
 
+model.compile(optimizer='Adam',loss='categorical_crossentropy', metrics=['accuracy'])
 
-    textImage = np.zeros((300,512,3), np.uint8)
-    className = ""
+# Load Saved Model
+model.load_weights("my_checkpoint")
 
-    # if predictedClass == 0:
-    #     className = "Swing"
-    # elif predictedClass == 1:
-    #     className = "Palm"
-    # elif predictedClass == 2:
-    #     className = "Fist"
-    className = str(predictedClass)
-
-    cv2.putText(textImage,"Pedicted Class : " + className, 
-    (30, 30), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-
-    cv2.putText(textImage,"Confidence : " + str(confidence * 100) + '%', 
-    (30, 100), 
-    cv2.FONT_HERSHEY_SIMPLEX, 
-    1,
-    (255, 255, 255),
-    2)
-    cv2.imshow("Statistics", textImage)
-
-
-
-
-def live_predict(model):
-    main(model)
-
+main()
